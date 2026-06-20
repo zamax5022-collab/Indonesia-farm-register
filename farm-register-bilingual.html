@@ -60,41 +60,6 @@
       margin-top: 2px;
     }
 
-    /* ── Steps indicator ── */
-    .steps {
-      display: flex;
-      justify-content: center;
-      gap: 0;
-      padding: 14px 20px 0;
-    }
-    .step-dot {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: var(--mist);
-      border: 2px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.72rem; font-weight: 700;
-      color: var(--muted);
-      transition: all .25s;
-      position: relative;
-      z-index: 1;
-    }
-    .step-dot.active {
-      background: var(--leaf); border-color: var(--leaf);
-      color: #fff; box-shadow: 0 0 0 4px rgba(45,106,47,.18);
-    }
-    .step-dot.done {
-      background: var(--sun); border-color: var(--sun);
-      color: #fff;
-    }
-    .step-line {
-      flex: 1; height: 2px;
-      background: var(--border);
-      align-self: center;
-      margin: 0 -1px;
-    }
-    .step-line.done { background: var(--sun); }
-
     /* ── Card ── */
     .card {
       background: #fff;
@@ -380,14 +345,6 @@
   </div>
 </header>
 
-<div class="steps">
-  <div class="step-dot active" id="s1">1</div>
-  <div class="step-line" id="l12"></div>
-  <div class="step-dot" id="s2">2</div>
-  <div class="step-line" id="l23"></div>
-  <div class="step-dot" id="s3">3</div>
-</div>
-
 <div class="card" id="step1Card">
   <div class="card-head">👤 Data Petani <span class="en">/ Farmer Info</span></div>
   <div class="card-body">
@@ -443,12 +400,18 @@
       <div class="pill-group">
         <input type="radio" name="drought" id="d0" value="0">
         <label for="d0"><span class="bi"><span class="main">🟢 Tidak ada</span><span class="sub">No impact</span></span></label>
+        
         <input type="radio" name="drought" id="d1" value="1">
         <label for="d1"><span class="bi"><span class="main">🟡 Ringan</span><span class="sub">Mild</span></span></label>
+        
         <input type="radio" name="drought" id="d2" value="2">
         <label for="d2"><span class="bi"><span class="main">🟠 Sedang</span><span class="sub">Moderate</span></span></label>
+        
         <input type="radio" name="drought" id="d3" value="3">
         <label for="d3"><span class="bi"><span class="main">🔴 Berat</span><span class="sub">Severe</span></span></label>
+        
+        <input type="radio" name="drought" id="d4" value="4">
+        <label for="d4"><span class="bi"><span class="main">🚨 Sangat Berat</span><span class="sub">Extreme</span></span></label>
       </div>
       <div class="error-msg" id="err-drought">Pilih tingkat kekeringan</div>
     </div>
@@ -468,9 +431,9 @@
             <div class="gps-coords"><span id="gpsAccuracy"></span></div>
           </div>
         </div>
-    <button id="getGpsBtn" onclick="getGPS()">
-        <span>📡</span> Ambil Lokasi GPS Saya <span style="font-size:0.8rem;font-weight:400;opacity:0.8">· Get My GPS</span>
-      </button>
+        <button id="getGpsBtn" onclick="getGPS()">
+          <span>📡</span> Ambil Lokasi GPS Saya <span style="font-size:0.8rem;font-weight:400;opacity:0.8">· Get My GPS</span>
+        </button>
       </div>
       <div class="error-msg" id="err-gps">Lokasi GPS wajib diambil terlebih dahulu</div>
     </div>
@@ -543,7 +506,6 @@
         hideError('err-gps');
 
         showMap(currentLat, currentLng);
-        updateSteps(2);
       },
       (err) => {
         let msg = 'Tidak dapat mengambil lokasi.';
@@ -611,7 +573,6 @@
   function confirmLocation() {
     locationConfirmed = true;
     updateSaveBtn();
-    updateSteps(3);
     const saveSection = document.getElementById('saveSection');
     saveSection.classList.add('visible');
     saveSection.scrollIntoView({ behavior: 'smooth' });
@@ -627,24 +588,11 @@
     document.getElementById('gpsAccuracy').textContent = '';
     document.getElementById('getGpsBtn').innerHTML = '<span>📡</span> Ambil Lokasi GPS Saya';
     document.getElementById('getGpsBtn').disabled = false;
-    updateSteps(1);
     updateSaveBtn();
   }
 
   function updateSaveBtn() {
     document.getElementById('saveBtn').disabled = !locationConfirmed;
-  }
-
-  // ── Steps ──
-  function updateSteps(active) {
-    for (let i = 1; i <= 3; i++) {
-      const dot = document.getElementById(`s${i}`);
-      dot.className = 'step-dot' + (i < active ? ' done' : i === active ? ' active' : '');
-    }
-    for (let i = 1; i <= 2; i++) {
-      const line = document.getElementById(`l${i}${i+1}`);
-      line.className = 'step-line' + (i < active ? ' done' : '');
-    }
   }
 
   // ── Validate ──
@@ -688,10 +636,8 @@
       longitude: currentLng,
     };
 
-    // ── Googleフォーム直接送信を実行 ──
     sendToSheets(data);
 
-    // ── ローカルストレージにも保存（オフライン対応）──
     const saved = JSON.parse(localStorage.getItem('farmData') || '[]');
     saved.push(data);
     localStorage.setItem('farmData', JSON.stringify(saved));
@@ -724,7 +670,7 @@
     }
   }
 
-  const droughtLabels = ['🟢 Tidak ada dampak','🟡 Ringan','🟠 Sedang','🔴 Berat'];
+  const droughtLabels = ['🟢 Tidak ada dampak','🟡 Ringan','🟠 Sedang','🔴 Berat','🚨 Sangat Berat'];
   const growthLabels = {
     bibit:'🌱 Bibit', vegetatif:'🌿 Vegetatif',
     berbunga:'🌸 Berbunga', berbuah:'🍫 Berbuah', panen:'✂️ Siap Panen'
