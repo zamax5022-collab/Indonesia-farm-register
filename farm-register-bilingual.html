@@ -753,12 +753,12 @@
   // Google Sheets送信関数（Apps Script設定後に使用）
 async function sendToSheets(data) {
   // ここにはGoogle Apps Scriptの「ウェブアプリURL」を入れます
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzac81XP7xR9o5WIeHEpaSZ8EXE5t2gfN1m-k6EB_cuZGyetATGgff6Ugnmgf4DrL9T6g/exec'; 
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyYUVG8OTzJ3d7fTTLGKR_ehgCAZS6_HcBnn3P1g6bVzBwTBLfQeOtGvfgj5Ya75ZND/exec'; 
   
   try {
     await fetch(SHEET_URL, {
       method: 'POST',
-      mode: 'no-cors', // これによりGitHubからの通信も許可されます
+      mode: 'cors', // これによりGitHubからの通信も許可されます
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
