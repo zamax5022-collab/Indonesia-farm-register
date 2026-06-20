@@ -742,28 +742,28 @@
     localStorage.setItem('farmData', JSON.stringify(saved));
   }
 
-  // Google Forms 送信関数（CORS/401制限を回避するダイレクト投函方式）
+ // Google Forms 送信関数（正しいentry IDをマッピングした修正版）
   async function sendToSheets(data) {
-    // ⚠️ 実際のGoogleフォーム送信専用URLを指定してください（末尾が /formResponse となる形です）
+    // 💡 末尾を /formResponse に書き換えた送信先URL
     const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScBDJB6Js5EdITOBzJcii5qrlyKcB40lLDe9IQlf_WU5EqsOw/formResponse'; 
     
-    // フォームの各項目 entry ID にデータをマッピングして格納
+    // 事前入力URLから取得した本物の項目IDにデータを格納します
     const formData = new FormData();
-    formData.append("entry.858485295", data.farmerName);
-    formData.append("entry.1436440261", data.cropType); 
-    formData.append("entry.680654060", data.growthStage);
-    formData.append("entry.1741548695", data.droughtLevel);
-    formData.append("entry.1982855110", data.latitude);
-    formData.append("entry.1691285098", data.longitude);
-    formData.append("entry.1542468758", data.timestamp);
+    formData.append("entry.149229802", data.farmerName);   // Nama Petani (お名前)
+    formData.append("entry.423024923", data.cropType);    // Jenis Tanaman (作物の種類)
+    formData.append("entry.1923255413", data.growthStage);  // Status Pertumbuhan (成長ステージ)
+    formData.append("entry.1623570418", data.droughtLevel); // Tingkat Dampak Kekeringan (乾燥レベル)
+    formData.append("entry.650180171", data.latitude);     // Latitude (緯度)
+    formData.append("entry.1629370264", data.longitude);    // Longitude (経度)
+    formData.append("entry.1770252052", data.timestamp);    // Waktu (タイムスタンプ)
 
     try {
       await fetch(FORM_URL, {
         method: 'POST',
-        mode: 'no-cors', // GitHub Pages等からのドメイン遮断エラーを回避
+        mode: 'no-cors', // クロスドメイン制限（CORS）を回避して安全に投函
         body: formData
       });
-      console.log('Google Formへの送信に成功しました（応答：なし/不透明）');
+      console.log('Google Formへの送信処理を実行しました（応答：不透明）');
       showSuccess(data); // 送信成功時にポップアップを起動
     } catch (e) {
       console.error('通信エラー:', e);
