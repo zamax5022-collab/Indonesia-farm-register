@@ -126,7 +126,7 @@
       text-transform: uppercase;
       letter-spacing: .04em;
     }
-    input[type=text], select {
+    input[type=text] {
       width: 100%;
       padding: 12px 14px;
       border: 1.5px solid var(--border);
@@ -135,25 +135,13 @@
       font-size: 1rem;
       color: var(--text);
       background: var(--cream);
-      appearance: none;
-      -webkit-appearance: none;
       transition: border-color .2s, box-shadow .2s;
     }
-    input[type=text]:focus, select:focus {
+    input[type=text]:focus {
       outline: none;
       border-color: var(--leaf);
       box-shadow: 0 0 0 3px rgba(45,106,47,.14);
       background: #fff;
-    }
-    .select-wrap {
-      position: relative;
-    }
-    .select-wrap::after {
-      content: '▾';
-      position: absolute; right: 14px; top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted); pointer-events: none;
-      font-size: 1rem;
     }
 
     /* ── Radio pills ── */
@@ -180,29 +168,6 @@
       border-color: var(--leaf);
       color: #fff;
       box-shadow: 0 2px 8px rgba(45,106,47,.22);
-    }
-
-    /* drought level pills */
-    .drought-group { display: flex; flex-direction: column; gap: 8px; }
-    .drought-group input[type=radio] { display: none; }
-    .drought-group label {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      background: var(--cream);
-      font-size: 0.88rem; font-weight: 600;
-      color: var(--muted); cursor: pointer;
-      text-transform: none; letter-spacing: 0;
-      transition: all .18s;
-    }
-    .drought-group input[type=radio]:checked + label { border-width: 2px; }
-    .drought-group input[type=radio]#d0:checked + label { background:#E8F5E9; border-color:#4CAF50; color:#1B5E20; }
-    .drought-group input[type=radio]#d1:checked + label { background:#FFFDE7; border-color:#FBC02D; color:#5D4037; }
-    .drought-group input[type=radio]#d2:checked + label { background:#FFF3E0; border-color:#F57C00; color:#BF360C; }
-    .drought-group input[type=radio]#d3:checked + label { background:#FFEBEE; border-color:#C62828; color:#B71C1C; }
-    .drought-dot {
-      width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
     }
 
     /* ── GPS box ── */
@@ -381,17 +346,13 @@
       margin-left: 5px;
       text-transform: none;
     }
-    .pill-group label .en,
-    .drought-group label .en {
+    .pill-group label .en {
       font-size: 0.72rem;
       font-weight: 400;
       color: rgba(255,255,255,0.65);
       margin-left: 0;
     }
     .pill-group input[type=radio]:not(:checked) + label .en {
-      color: var(--border);
-    }
-    .drought-group input[type=radio]:not(:checked) + label .en {
       color: var(--border);
     }
     .bi {
@@ -401,8 +362,6 @@
     }
     .bi .main { font-weight: 600; font-size: 0.88rem; }
     .bi .sub  { font-size: 0.72rem; color: var(--border); font-weight: 400; }
-    /* for checked states */
-    .drought-group input[type=radio]:checked + label .bi .sub { color: rgba(0,0,0,0.38); }
     .card-head .en {
       font-size: 0.75rem;
       font-weight: 400;
@@ -441,18 +400,23 @@
 
     <div class="field">
       <label>Jenis Tanaman <span class="en">Crop Type</span></label>
-      <div class="select-wrap">
-        <select id="cropType">
-          <option value="">-- Pilih tanaman / Select crop --</option>
-          <option value="kakao">🍫 Kakao · Cacao</option>
-          <option value="jagung">🌽 Jagung · Corn</option>
-          <option value="kelapa_sawit">🌴 Kelapa Sawit · Palm Oil</option>
-          <option value="kopi">☕ Kopi · Coffee</option>
-          <option value="padi">🌾 Padi · Rice</option>
-          <option value="singkong">🟤 Singkong · Cassava</option>
-          <option value="kelapa">🥥 Kelapa · Coconut</option>
-          <option value="lainnya">➕ Lainnya · Other</option>
-        </select>
+      <div class="pill-group">
+        <input type="radio" name="crop" id="c1" value="kakao">
+        <label for="c1"><span class="bi"><span class="main">🍫 Kakao</span><span class="sub">Cacao</span></span></label>
+        <input type="radio" name="crop" id="c2" value="jagung">
+        <label for="c2"><span class="bi"><span class="main">🌽 Jagung</span><span class="sub">Corn</span></span></label>
+        <input type="radio" name="crop" id="c3" value="kelapa_sawit">
+        <label for="c3"><span class="bi"><span class="main">🌴 Kelapa Sawit</span><span class="sub">Palm Oil</span></span></label>
+        <input type="radio" name="crop" id="c4" value="kopi">
+        <label for="c4"><span class="bi"><span class="main">☕ Kopi</span><span class="sub">Coffee</span></span></label>
+        <input type="radio" name="crop" id="c5" value="padi">
+        <label for="c5"><span class="bi"><span class="main">🌾 Padi</span><span class="sub">Rice</span></span></label>
+        <input type="radio" name="crop" id="c6" value="singkong">
+        <label for="c6"><span class="bi"><span class="main">🟤 Singkong</span><span class="sub">Cassava</span></span></label>
+        <input type="radio" name="crop" id="c7" value="kelapa">
+        <label for="c7"><span class="bi"><span class="main">🥥 Kelapa</span><span class="sub">Coconut</span></span></label>
+        <input type="radio" name="crop" id="c8" value="lainnya">
+        <label for="c8"><span class="bi"><span class="main">➕ Lainnya</span><span class="sub">Other</span></span></label>
       </div>
       <div class="error-msg" id="err-crop">Pilih jenis tanaman</div>
     </div>
@@ -476,27 +440,15 @@
 
     <div class="field">
       <label>Tingkat Dampak Kekeringan <span class="en">Drought Impact Level</span></label>
-      <div class="drought-group">
+      <div class="pill-group">
         <input type="radio" name="drought" id="d0" value="0">
-        <label for="d0">
-          <span class="drought-dot" style="background:#4CAF50"></span>
-          <span class="bi"><span class="main">Tidak ada dampak</span><span class="sub">No impact</span></span>
-        </label>
+        <label for="d0"><span class="bi"><span class="main">🟢 Tidak ada</span><span class="sub">No impact</span></span></label>
         <input type="radio" name="drought" id="d1" value="1">
-        <label for="d1">
-          <span class="drought-dot" style="background:#FBC02D"></span>
-          <span class="bi"><span class="main">Ringan — daun mulai layu</span><span class="sub">Mild — leaves starting to wilt</span></span>
-        </label>
+        <label for="d1"><span class="bi"><span class="main">🟡 Ringan</span><span class="sub">Mild</span></span></label>
         <input type="radio" name="drought" id="d2" value="2">
-        <label for="d2">
-          <span class="drought-dot" style="background:#F57C00"></span>
-          <span class="bi"><span class="main">Sedang — pertumbuhan terganggu</span><span class="sub">Moderate — growth disrupted</span></span>
-        </label>
+        <label for="d2"><span class="bi"><span class="main">🟠 Sedang</span><span class="sub">Moderate</span></span></label>
         <input type="radio" name="drought" id="d3" value="3">
-        <label for="d3">
-          <span class="drought-dot" style="background:#C62828"></span>
-          <span class="bi"><span class="main">Berat — tanaman rusak / mati</span><span class="sub">Severe — crops damaged / dying</span></span>
-        </label>
+        <label for="d3"><span class="bi"><span class="main">🔴 Berat</span><span class="sub">Severe</span></span></label>
       </div>
       <div class="error-msg" id="err-drought">Pilih tingkat kekeringan</div>
     </div>
@@ -706,7 +658,7 @@
   function validateForm() {
     let ok = true;
     const name = document.getElementById('farmerName').value.trim();
-    const crop = document.getElementById('cropType').value;
+    const crop = document.querySelector('input[name="crop"]:checked');
     const growth = document.querySelector('input[name="growth"]:checked');
     const drought = document.querySelector('input[name="drought"]:checked');
 
@@ -722,11 +674,14 @@
   function saveData() {
     if (!validateForm()) return;
 
+    const selectedCropInput = document.querySelector('input[name="crop"]:checked');
+    const selectedCropLabel = selectedCropInput.nextElementSibling.querySelector('.main').textContent;
+
     const data = {
       timestamp: new Date().toISOString(),
       farmerName: document.getElementById('farmerName').value.trim(),
-      cropType: document.getElementById('cropType').value,
-      cropLabel: document.getElementById('cropType').options[document.getElementById('cropType').selectedIndex].text,
+      cropType: selectedCropInput.value,
+      cropLabel: selectedCropLabel,
       growthStage: document.querySelector('input[name="growth"]:checked').value,
       droughtLevel: document.querySelector('input[name="drought"]:checked').value,
       latitude: currentLat,
@@ -742,36 +697,34 @@
     localStorage.setItem('farmData', JSON.stringify(saved));
   }
 
- // Google Forms 送信関数（正しいentry IDをマッピングした修正版）
+  // Google Forms 送信関数
   async function sendToSheets(data) {
-    // 💡 末尾を /formResponse に書き換えた送信先URL
     const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScBDJB6Js5EdITOBzJcii5qrlyKcB40lLDe9IQlf_WU5EqsOw/formResponse'; 
     
-    // 事前入力URLから取得した本物の項目IDにデータを格納します
     const formData = new FormData();
-    formData.append("entry.149229802", data.farmerName);   // Nama Petani (お名前)
-    formData.append("entry.423024923", data.cropType);    // Jenis Tanaman (作物の種類)
-    formData.append("entry.1923255413", data.growthStage);  // Status Pertumbuhan (成長ステージ)
-    formData.append("entry.1623570418", data.droughtLevel); // Tingkat Dampak Kekeringan (乾燥レベル)
-    formData.append("entry.650180171", data.latitude);     // Latitude (緯度)
-    formData.append("entry.1629370264", data.longitude);    // Longitude (経度)
-    formData.append("entry.1770252052", data.timestamp);    // Waktu (タイムスタンプ)
+    formData.append("entry.149229802", data.farmerName);
+    formData.append("entry.423024923", data.cropType); 
+    formData.append("entry.1923255413", data.growthStage);
+    formData.append("entry.1623570418", data.droughtLevel);
+    formData.append("entry.650180171", data.latitude);
+    formData.append("entry.1629370264", data.longitude);
+    formData.append("entry.1770252052", data.timestamp);
 
     try {
       await fetch(FORM_URL, {
         method: 'POST',
-        mode: 'no-cors', // クロスドメイン制限（CORS）を回避して安全に投函
+        mode: 'no-cors',
         body: formData
       });
-      console.log('Google Formへの送信処理を実行しました（応答：不透明）');
-      showSuccess(data); // 送信成功時にポップアップを起動
+      console.log('Google Formへの送信に成功しました');
+      showSuccess(data);
     } catch (e) {
       console.error('通信エラー:', e);
       alert("Gagal mengirim data / Failed to send data: " + e);
     }
   }
 
-  const droughtLabels = ['Tidak ada dampak','Ringan','Sedang','Berat'];
+  const droughtLabels = ['🟢 Tidak ada dampak','🟡 Ringan','🟠 Sedang','🔴 Berat'];
   const growthLabels = {
     bibit:'🌱 Bibit', vegetatif:'🌿 Vegetatif',
     berbunga:'🌸 Berbunga', berbuah:'🍫 Berbuah', panen:'✂️ Siap Panen'
@@ -792,7 +745,7 @@
   function resetForm() {
     document.getElementById('successScreen').classList.remove('visible');
     document.getElementById('farmerName').value = '';
-    document.getElementById('cropType').value = '';
+    document.querySelectorAll('input[name="crop"]').forEach(r => r.checked = false);
     document.querySelectorAll('input[name="growth"]').forEach(r => r.checked = false);
     document.querySelectorAll('input[name="drought"]').forEach(r => r.checked = false);
     rejectLocation();
