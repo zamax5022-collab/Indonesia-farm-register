@@ -22,20 +22,22 @@
     .card-head { background: var(--mist); padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 700; color: var(--soil); }
     .card-body { padding: 16px; }
     .field { margin-bottom: 16px; }
-    input[type=text], select { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; }
+    input[type=text], select { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; box-sizing: border-box; }
     .pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
     .pill-group input { display: none; }
     .pill-group label { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 30px; cursor: pointer; }
     .pill-group input:checked + label { background: var(--leaf); color: #fff; border-color: var(--leaf); }
-    #getGpsBtn { width: 100%; padding: 12px; background: var(--leaf); color: #fff; border: none; border-radius: 10px; cursor: pointer; }
-    #saveBtn { width: 100%; padding: 16px; background: var(--leaf); color: #fff; border: none; border-radius: var(--radius); cursor: pointer; }
-    #saveBtn:disabled { background: var(--border); }
+    #getGpsBtn { width: 100%; padding: 12px; background: var(--leaf); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+    #saveBtn { width: 100%; padding: 16px; background: var(--leaf); color: #fff; border: none; border-radius: var(--radius); cursor: pointer; font-size: 1rem; font-weight: bold; }
+    #saveBtn:disabled { background: var(--border); cursor: not-allowed; }
     #successScreen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
     #successScreen.visible { display: flex; }
-    .success-card { background: #fff; border-radius: 20px; padding: 30px; text-align: center; max-width: 320px; width: 100%; }
-    .error-msg { display: none; color: var(--danger); font-size: 0.8rem; }
+    .success-card { background: #fff; border-radius: 20px; padding: 30px; text-align: center; max-width: 320px; width: 100%; box-shadow: var(--shadow); }
+    .success-card h2 { color: var(--leaf); margin-top: 0; }
+    .success-card button { width: 100%; padding: 12px; background: var(--leaf); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+    .error-msg { display: none; color: var(--danger); font-size: 0.8rem; margin-top: 4px; }
     .error-msg.show { display: block; }
-    .en { font-size: 0.75rem; color: #888; }
+    .en { font-size: 0.75rem; color: #888; display: block; font-weight: normal; }
   </style>
 </head>
 <body>
@@ -45,27 +47,29 @@
 </header>
 
 <div class="card">
-  <div class="card-head">👤 Data Petani</div>
+  <div class="card-head">👤 Data Petani <span class="en">Farmer Data</span></div>
   <div class="card-body">
     <div class="field">
-      <label>Nama Petani</label>
+      <label>Nama Petani <span class="en">Farmer Name</span></label>
       <input type="text" id="farmerName" placeholder="Nama lengkap">
-      <div class="error-msg" id="err-name">Wajib diisi</div>
+      <div class="error-msg" id="err-name">Wajib diisi / Required</div>
     </div>
+    
     <div class="field">
-      <label>Jenis Tanaman</label>
+      <label>Jenis Tanaman <span class="en">Crop Type</span></label>
       <select id="cropType">
-        <option value="">-- Pilih --</option>
-        <option value="kakao">Kakao</option>
-        <option value="jagung">Jagung</option>
-        <option value="padi">Padi</option>
+        <option value="">-- Pilih / Select --</option>
+        <option value="Kakao">Kakao / Cocoa</option>
+        <option value="Jagung">Jagung / Maize</option>
+        <option value="Padi">Padi / Rice</option>
       </select>
     </div>
+    
     <div class="field">
-        <label>Status</label>
+        <label>Status <span class="en">Growth Stage</span></label>
         <div class="pill-group">
-            <input type="radio" name="growth" id="g1" value="bibit"><label for="g1">Bibit</label>
-            <input type="radio" name="growth" id="g2" value="panen"><label for="g2">Panen</label>
+            <input type="radio" name="growth" id="g1" value="Bibit"><label for="g1">Bibit / Seedling</label>
+            <input type="radio" name="growth" id="g2" value="Panen"><label for="g2">Panen / Harvest</label>
         </div>
     </div>
   </div>
@@ -73,19 +77,20 @@
 
 <div class="card">
   <div class="card-body">
-    <button id="getGpsBtn" onclick="getGPS()">📡 Ambil Lokasi GPS</button>
-    <div id="gpsCoords" style="margin-top:10px; font-family: monospace;">Belum diambil</div>
+    <button id="getGpsBtn" onclick="getGPS()">📡 Ambil Lokasi GPS <span class="en" style="color:#fff;">Get GPS Location</span></button>
+    <div id="gpsCoords" style="margin-top:10px; font-family: monospace; font-size: 0.9rem; color: var(--muted);">Belum diambil / Not acquired</div>
   </div>
 </div>
 
-<div class="card" id="saveSection">
-    <button id="saveBtn" onclick="saveData()" disabled>💾 Simpan Data</button>
+<div class="card" id="saveSection" style="background: transparent; box-shadow: none; margin-top: 24px;">
+    <button id="saveBtn" onclick="saveData()" disabled>💾 Simpan Data <span class="en" style="color:#fff;">Save Data</span></button>
 </div>
 
 <div id="successScreen">
   <div class="success-card">
-    <h2>Sukses!</h2>
-    <button onclick="location.reload()">Selesai</button>
+    <h2>✓ Sukses!</h2>
+    <p>Data Berhasil Disimpan!<br><span class="en">Data saved successfully</span></p>
+    <button onclick="location.reload()">Selesai / Finish</button>
   </div>
 </div>
 
@@ -93,37 +98,70 @@
   let currentLat = null, currentLng = null;
 
   function getGPS() {
-    navigator.geolocation.getCurrentPosition(pos => {
-      currentLat = pos.coords.latitude;
-      currentLng = pos.coords.longitude;
-      document.getElementById('gpsCoords').textContent = currentLat + ", " + currentLng;
-      document.getElementById('saveBtn').disabled = false;
-    });
+    const gpsBtn = document.getElementById('getGpsBtn');
+    gpsBtn.textContent = "Mengambil... / Acquiring...";
+    
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        currentLat = pos.coords.latitude;
+        currentLng = pos.coords.longitude;
+        document.getElementById('gpsCoords').textContent = currentLat + ", " + currentLng;
+        document.getElementById('saveBtn').disabled = false;
+        gpsBtn.innerHTML = "📡 Ambil Lokasi GPS <span class='en' style='color:#fff;'>Get GPS Location</span>";
+      },
+      err => {
+        alert("GPS Error: " + err.message);
+        gpsBtn.innerHTML = "📡 Ambil Lokasi GPS <span class='en' style='color:#fff;'>Get GPS Location</span>";
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   }
 
   async function saveData() {
-    const data = {
-      timestamp: new Date().toISOString(),
-      farmerName: document.getElementById('farmerName').value,
-      cropLabel: document.getElementById('cropType').value,
-      growthStage: document.querySelector('input[name="growth"]:checked')?.value || '',
-      droughtLevel: '0',
-      latitude: currentLat,
-      longitude: currentLng
-    };
-
-    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyVSsETKnS6HkBItZb9y5Pgdp8JiJxGvpFcRDuMyX1Yv2rMsCLo5Kw7ONqDoWwRbOpyIA/exec';
+    const nameInput = document.getElementById('farmerName');
+    const errName = document.getElementById('err-name');
     
+    // バリデーション
+    if (!nameInput.value.trim()) {
+      errName.classList.add('show');
+      nameInput.focus();
+      return;
+    } else {
+      errName.classList.remove('show');
+    }
+
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = "Mengirim... / Sending...";
+
+    // 1. 共有用URLから生成した、フォームの「データ送信専用エンドポイント」
+    const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScBDJB6Js5EdITOBzJcii5qrlyKcB40lLDe9IQlf_WU5EqsOw/formResponse"; 
+    // ※ 注意: 上記の URL はダミーです。ご自身のGoogleフォームの実際の公開URL（.../viewform）の末尾を「formResponse」に書き換えたものに置き換えてください。
+
+    // 2. 共有リンクから直接マッピングした正しい entry ID でデータを構築
+    const formData = new FormData();
+    formData.append("entry.858485295", nameInput.value); // Farmer Name
+    formData.append("entry.1436440261", document.getElementById('cropType').value); // Crop
+    formData.append("entry.680654060", document.querySelector('input[name="growth"]:checked')?.value || ''); // Growth Stage
+    formData.append("entry.1741548695", "0"); // Drought Level (固定値)
+    formData.append("entry.1982855110", currentLat); // Latitude
+    formData.append("entry.1691285098", currentLng); // Longitude
+    formData.append("entry.1542468758", new Date().toISOString()); // Date/Time
+
     try {
-      const res = await fetch(SHEET_URL, {
-        method: 'POST',
-        mode: 'no-cors', // これをno-corsにすると401エラーを回避しやすいです
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+      // CORS制限を回避して直接フォームにPOST投函
+      await fetch(FORM_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: formData
       });
+      
+      // 送信成功時に元のデザイン通りのポップアップを表示
       document.getElementById('successScreen').classList.add('visible');
     } catch (e) {
       alert("Error: " + e);
+      btn.disabled = false;
+      btn.innerHTML = "💾 Simpan Data <span class='en' style='color:#fff;'>Save Data</span>";
     }
   }
 </script>
