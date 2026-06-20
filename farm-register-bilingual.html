@@ -10,159 +10,793 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
-      --soil:    #3B2A1A; --leaf:    #2D6A2F; --leaf-lt: #4CAF50;
-      --sun:     #E8A020; --sun-lt:  #FFC94D; --sky:     #D6EAF8;
-      --cream:   #F9F5EE; --mist:    #EEE9DF; --text:    #1A1208;
-      --muted:   #7A6A52; --danger:  #C0392B; --border:  #C8B89A;
-      --radius:  14px;    --shadow:  0 2px 12px rgba(59,42,26,0.10);
+      --soil:    #3B2A1A;
+      --leaf:    #2D6A2F;
+      --leaf-lt: #4CAF50;
+      --sun:     #E8A020;
+      --sun-lt:  #FFC94D;
+      --sky:     #D6EAF8;
+      --cream:   #F9F5EE;
+      --mist:    #EEE9DF;
+      --text:    #1A1208;
+      --muted:   #7A6A52;
+      --danger:  #C0392B;
+      --border:  #C8B89A;
+      --radius:  14px;
+      --shadow:  0 2px 12px rgba(59,42,26,0.10);
     }
-    body { font-family: 'Noto Sans', sans-serif; background: var(--cream); color: var(--text); padding-bottom: 32px; }
-    header { background: var(--leaf); padding: 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.18); color: #fff; }
-    .card { background: #fff; margin: 16px 16px 0; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-    .card-head { background: var(--mist); padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 700; color: var(--soil); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 32px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--leaf);
+      padding: 20px 20px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .header-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+    header h1 {
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    header p {
+      color: rgba(255,255,255,0.78);
+      font-size: 0.78rem;
+      margin-top: 2px;
+    }
+
+    /* ── Steps indicator ── */
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      padding: 14px 20px 0;
+    }
+    .step-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--mist);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--muted);
+      transition: all .25s;
+      position: relative;
+      z-index: 1;
+    }
+    .step-dot.active {
+      background: var(--leaf); border-color: var(--leaf);
+      color: #fff; box-shadow: 0 0 0 4px rgba(45,106,47,.18);
+    }
+    .step-dot.done {
+      background: var(--sun); border-color: var(--sun);
+      color: #fff;
+    }
+    .step-line {
+      flex: 1; height: 2px;
+      background: var(--border);
+      align-self: center;
+      margin: 0 -1px;
+    }
+    .step-line.done { background: var(--sun); }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      margin: 16px 16px 0;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-head {
+      background: var(--mist);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--soil);
+      display: flex; align-items: center; gap: 8px;
+    }
     .card-body { padding: 16px; }
+
+    /* ── Form elements ── */
     .field { margin-bottom: 16px; }
-    input[type=text], select { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; box-sizing: border-box; }
-    .pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
-    .pill-group input { display: none; }
-    .pill-group label { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 30px; cursor: pointer; }
-    .pill-group input:checked + label { background: var(--leaf); color: #fff; border-color: var(--leaf); }
-    #getGpsBtn { width: 100%; padding: 12px; background: var(--leaf); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-    #saveBtn { width: 100%; padding: 16px; background: var(--leaf); color: #fff; border: none; border-radius: var(--radius); cursor: pointer; font-size: 1rem; font-weight: bold; }
-    #saveBtn:disabled { background: var(--border); cursor: not-allowed; }
-    #successScreen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .field:last-child { margin-bottom: 0; }
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    input[type=text], select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text);
+      background: var(--cream);
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input[type=text]:focus, select:focus {
+      outline: none;
+      border-color: var(--leaf);
+      box-shadow: 0 0 0 3px rgba(45,106,47,.14);
+      background: #fff;
+    }
+    .select-wrap {
+      position: relative;
+    }
+    .select-wrap::after {
+      content: '▾';
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted); pointer-events: none;
+      font-size: 1rem;
+    }
+
+    /* ── Radio pills ── */
+    .pill-group {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .pill-group input[type=radio] { display: none; }
+    .pill-group label {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 30px;
+      background: var(--cream);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      text-transform: none;
+      letter-spacing: 0;
+      transition: all .18s;
+    }
+    .pill-group input[type=radio]:checked + label {
+      background: var(--leaf);
+      border-color: var(--leaf);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(45,106,47,.22);
+    }
+
+    /* drought level pills */
+    .drought-group { display: flex; flex-direction: column; gap: 8px; }
+    .drought-group input[type=radio] { display: none; }
+    .drought-group label {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--cream);
+      font-size: 0.88rem; font-weight: 600;
+      color: var(--muted); cursor: pointer;
+      text-transform: none; letter-spacing: 0;
+      transition: all .18s;
+    }
+    .drought-group input[type=radio]:checked + label { border-width: 2px; }
+    .drought-group input[type=radio]#d0:checked + label { background:#E8F5E9; border-color:#4CAF50; color:#1B5E20; }
+    .drought-group input[type=radio]#d1:checked + label { background:#FFFDE7; border-color:#FBC02D; color:#5D4037; }
+    .drought-group input[type=radio]#d2:checked + label { background:#FFF3E0; border-color:#F57C00; color:#BF360C; }
+    .drought-group input[type=radio]#d3:checked + label { background:#FFEBEE; border-color:#C62828; color:#B71C1C; }
+    .drought-dot {
+      width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* ── GPS box ── */
+    .gps-box {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .gps-status {
+      padding: 12px 14px;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--cream);
+    }
+    .gps-pulse {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--border); flex-shrink: 0;
+    }
+    .gps-pulse.ok { background: var(--leaf-lt); box-shadow: 0 0 0 4px rgba(76,175,80,.2); }
+    .gps-pulse.loading { background: var(--sun); animation: pulse 1s infinite; }
+    .gps-pulse.error { background: var(--danger); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .gps-coords {
+      font-family: 'Noto Sans Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--soil);
+    }
+    .gps-coords span { color: var(--muted); font-size: 0.75rem; }
+    #getGpsBtn {
+      width: 100%;
+      padding: 11px;
+      background: var(--leaf);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background .2s;
+    }
+    #getGpsBtn:hover { background: #245c26; }
+    #getGpsBtn:disabled { background: var(--border); cursor: not-allowed; }
+
+    /* ── Map ── */
+    #mapContainer {
+      display: none;
+      margin: 16px 16px 0;
+    }
+    #mapContainer.visible { display: block; }
+    .map-card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .map-card .card-head { background: #EAF4EA; }
+    #map {
+      height: 260px;
+    }
+    .map-note {
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: var(--mist);
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    /* ── Confirm button ── */
+    .confirm-wrap {
+      padding: 14px 16px;
+      display: flex; gap: 10px;
+    }
+    #rejectBtn {
+      flex: 1;
+      padding: 13px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      font-family: inherit; font-size: 0.95rem; font-weight: 700;
+      color: var(--muted); cursor: pointer;
+    }
+    #confirmBtn {
+      flex: 2;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: var(--sun);
+      color: var(--soil);
+      font-family: inherit; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 3px 10px rgba(232,160,32,.35);
+      transition: background .2s, transform .1s;
+    }
+    #confirmBtn:active { transform: scale(.97); }
+
+    /* ── Save button ── */
+    #saveSection {
+      display: none;
+      margin: 16px 16px 0;
+    }
+    #saveSection.visible { display: block; }
+    #saveBtn {
+      width: 100%;
+      padding: 16px;
+      background: var(--leaf);
+      color: #fff;
+      font-family: inherit; font-size: 1.05rem; font-weight: 700;
+      border: none; border-radius: var(--radius);
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(45,106,47,.3);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: background .2s, transform .1s;
+    }
+    #saveBtn:active { transform: scale(.98); }
+    #saveBtn:disabled { background: var(--border); box-shadow: none; cursor: not-allowed; }
+
+    /* ── Success screen ── */
+    #successScreen {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(27,18,4,.7);
+      z-index: 1000;
+      align-items: center; justify-content: center;
+      padding: 24px;
+    }
     #successScreen.visible { display: flex; }
-    .success-card { background: #fff; border-radius: 20px; padding: 30px; text-align: center; max-width: 320px; width: 100%; box-shadow: var(--shadow); }
-    .success-card h2 { color: var(--leaf); margin-top: 0; }
-    .success-card button { width: 100%; padding: 12px; background: var(--leaf); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-    .error-msg { display: none; color: var(--danger); font-size: 0.8rem; margin-top: 4px; }
+    .success-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 36px 28px;
+      text-align: center;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 8px 40px rgba(0,0,0,.25);
+    }
+    .success-icon { font-size: 3.5rem; margin-bottom: 12px; }
+    .success-card h2 { font-size: 1.3rem; color: var(--leaf); margin-bottom: 8px; }
+    .success-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+    .success-data {
+      background: var(--mist);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: left;
+      margin-bottom: 20px;
+      font-size: 0.83rem;
+      color: var(--soil);
+      line-height: 1.7;
+    }
+    .success-data strong { font-weight: 700; }
+    #newEntryBtn {
+      width: 100%;
+      padding: 14px;
+      background: var(--leaf);
+      color: #fff;
+      border: none; border-radius: 10px;
+      font-family: inherit; font-size: 1rem; font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── Util ── */
+    .section-gap { margin-top: 10px; }
+    .error-msg {
+      font-size: 0.8rem; color: var(--danger);
+      margin-top: 5px; display: none;
+    }
     .error-msg.show { display: block; }
-    .en { font-size: 0.75rem; color: #888; display: block; font-weight: normal; }
+
+    /* ── Bilingual labels ── */
+    label .en {
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--border);
+      letter-spacing: .02em;
+      margin-left: 5px;
+      text-transform: none;
+    }
+    .pill-group label .en,
+    .drought-group label .en {
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: rgba(255,255,255,0.65);
+      margin-left: 0;
+    }
+    .pill-group input[type=radio]:not(:checked) + label .en {
+      color: var(--border);
+    }
+    .drought-group input[type=radio]:not(:checked) + label .en {
+      color: var(--border);
+    }
+    .bi {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .bi .main { font-weight: 600; font-size: 0.88rem; }
+    .bi .sub  { font-size: 0.72rem; color: var(--border); font-weight: 400; }
+    /* for checked states */
+    .drought-group input[type=radio]:checked + label .bi .sub { color: rgba(0,0,0,0.38); }
+    .card-head .en {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 4px;
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Daftar Lahan <span class="en">Farm Register</span></h1>
+  <div class="header-icon">🌱</div>
+  <div>
+    <h1>Daftar Lahan Pertanian <span style="font-size:0.75rem;font-weight:400;opacity:0.7">Farm Registration</span></h1>
+    <p>Naimoe, Sulawesi · Sistem Pemantauan Air <span style="opacity:0.6">/ Water Monitoring</span></p>
+  </div>
 </header>
 
-<div class="card">
-  <div class="card-head">👤 Data Petani <span class="en">Farmer Data</span></div>
+<div class="steps">
+  <div class="step-dot active" id="s1">1</div>
+  <div class="step-line" id="l12"></div>
+  <div class="step-dot" id="s2">2</div>
+  <div class="step-line" id="l23"></div>
+  <div class="step-dot" id="s3">3</div>
+</div>
+
+<div class="card" id="step1Card">
+  <div class="card-head">👤 Data Petani <span class="en">/ Farmer Info</span></div>
   <div class="card-body">
+
     <div class="field">
       <label>Nama Petani <span class="en">Farmer Name</span></label>
-      <input type="text" id="farmerName" placeholder="Nama lengkap">
-      <div class="error-msg" id="err-name">Wajib diisi / Required</div>
+      <input type="text" id="farmerName" placeholder="Masukkan nama lengkap · Enter full name" />
+      <div class="error-msg" id="err-name">Nama wajib diisi</div>
     </div>
-    
+
     <div class="field">
       <label>Jenis Tanaman <span class="en">Crop Type</span></label>
-      <select id="cropType">
-        <option value="">-- Pilih / Select --</option>
-        <option value="Kakao">Kakao / Cocoa</option>
-        <option value="Jagung">Jagung / Maize</option>
-        <option value="Padi">Padi / Rice</option>
-      </select>
+      <div class="select-wrap">
+        <select id="cropType">
+          <option value="">-- Pilih tanaman / Select crop --</option>
+          <option value="Kakao">🍫 Kakao · Cacao</option>
+          <option value="Jagung">🌽 Jagung · Corn</option>
+          <option value="Kelapa Sawit">🌴 Kelapa Sawit · Palm Oil</option>
+          <option value="Kopi">☕ Kopi · Coffee</option>
+          <option value="Padi">🌾 Padi · Rice</option>
+          <option value="Singkong">🟤 Singkong · Cassava</option>
+          <option value="Kelapa">🥥 Kelapa · Coconut</option>
+          <option value="Lainnya">➕ Lainnya · Other</option>
+        </select>
+      </div>
+      <div class="error-msg" id="err-crop">Pilih jenis tanaman</div>
     </div>
-    
+
     <div class="field">
-        <label>Status <span class="en">Growth Stage</span></label>
-        <div class="pill-group">
-            <input type="radio" name="growth" id="g1" value="Bibit"><label for="g1">Bibit / Seedling</label>
-            <input type="radio" name="growth" id="g2" value="Panen"><label for="g2">Panen / Harvest</label>
+      <label>Status Pertumbuhan <span class="en">Growth Stage</span></label>
+      <div class="pill-group">
+        <input type="radio" name="growth" id="g1" value="Bibit">
+        <label for="g1"><span class="bi"><span class="main">🌱 Bibit</span><span class="sub">Seedling</span></span></label>
+        <input type="radio" name="growth" id="g2" value="Vegetatif">
+        <label for="g2"><span class="bi"><span class="main">🌿 Vegetatif</span><span class="sub">Vegetative</span></span></label>
+        <input type="radio" name="growth" id="g3" value="Berbunga">
+        <label for="g3"><span class="bi"><span class="main">🌸 Berbunga</span><span class="sub">Flowering</span></span></label>
+        <input type="radio" name="growth" id="g4" value="Berbuah">
+        <label for="g4"><span class="bi"><span class="main">🍫 Berbuah</span><span class="sub">Fruiting</span></span></label>
+        <input type="radio" name="growth" id="g5" value="Panen">
+        <label for="g5"><span class="bi"><span class="main">✂️ Siap Panen</span><span class="sub">Ready to harvest</span></span></label>
+      </div>
+      <div class="error-msg" id="err-growth">Pilih status pertumbuhan</div>
+    </div>
+
+    <div class="field">
+      <label>Tingkat Dampak Kekeringan <span class="en">Drought Impact Level</span></label>
+      <div class="drought-group">
+        <input type="radio" name="drought" id="d0" value="0">
+        <label for="d0">
+          <span class="drought-dot" style="background:#4CAF50"></span>
+          <span class="bi"><span class="main">Tidak ada dampak</span><span class="sub">No impact</span></span>
+        </label>
+        <input type="radio" name="drought" id="d1" value="1">
+        <label for="d1">
+          <span class="drought-dot" style="background:#FBC02D"></span>
+          <span class="bi"><span class="main">Ringan — daun mulai layu</span><span class="sub">Mild — leaves starting to wilt</span></span>
+        </label>
+        <input type="radio" name="drought" id="d2" value="2">
+        <label for="d2">
+          <span class="drought-dot" style="background:#F57C00"></span>
+          <span class="bi"><span class="main">Sedang — pertumbuhan terganggu</span><span class="sub">Moderate — growth disrupted</span></span>
+        </label>
+        <input type="radio" name="drought" id="d3" value="3">
+        <label for="d3">
+          <span class="drought-dot" style="background:#C62828"></span>
+          <span class="bi"><span class="main">Berat — tanaman rusak / mati</span><span class="sub">Severe — crops damaged / dying</span></span>
+        </label>
+      </div>
+      <div class="error-msg" id="err-drought">Pilih tingkat kekeringan</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card section-gap" id="step2Card">
+  <div class="card-head">📍 Lokasi Lahan <span class="en">/ Field Location</span></div>
+  <div class="card-body">
+    <div class="field">
+      <div class="gps-box">
+        <div class="gps-status">
+          <div class="gps-pulse" id="gpsPulse"></div>
+          <div>
+            <div class="gps-coords" id="gpsCoords">Belum diambil</div>
+            <div class="gps-coords"><span id="gpsAccuracy"></span></div>
+          </div>
         </div>
+    <button id="getGpsBtn" onclick="getGPS()">
+        <span>📡</span> Ambil Lokasi GPS Saya <span style="font-size:0.8rem;font-weight:400;opacity:0.8">· Get My GPS</span>
+      </button>
+      </div>
+      <div class="error-msg" id="err-gps">Lokasi GPS wajib diambil terlebih dahulu</div>
     </div>
   </div>
 </div>
 
-<div class="card">
-  <div class="card-body">
-    <button id="getGpsBtn" onclick="getGPS()">📡 Ambil Lokasi GPS <span class="en" style="color:#fff;">Get GPS Location</span></button>
-    <div id="gpsCoords" style="margin-top:10px; font-family: monospace; font-size: 0.9rem; color: var(--muted);">Belum diambil / Not acquired</div>
+<div id="mapContainer" class="section-gap">
+  <div class="map-card">
+    <div class="card-head">🗺️ Konfirmasi Lokasi <span class="en">/ Confirm Location</span></div>
+    <div id="map"></div>
+    <div class="map-note">📌 Pastikan pin berada di lahan Anda. Seret pin untuk menyesuaikan.<br><span style="font-size:0.75rem;color:#aaa">Make sure the pin is on your field. Drag to adjust.</span></div>
+    <div class="confirm-wrap">
+      <button id="rejectBtn" onclick="rejectLocation()">↩ Ulang <span style="font-size:0.78rem;font-weight:400">Redo</span></button>
+      <button id="confirmBtn" onclick="confirmLocation()">✓ Lokasi Benar <span style="font-size:0.78rem;font-weight:400">Location OK</span></button>
+    </div>
   </div>
 </div>
 
-<div class="card" id="saveSection" style="background: transparent; box-shadow: none; margin-top: 24px;">
-    <button id="saveBtn" onclick="saveData()" disabled>💾 Simpan Data <span class="en" style="color:#fff;">Save Data</span></button>
+<div id="saveSection" class="section-gap">
+  <button id="saveBtn" onclick="saveData()" disabled>
+    💾 Simpan Data Lahan <span style="font-size:0.82rem;font-weight:400;opacity:0.85">· Save Field Data</span>
+  </button>
 </div>
 
 <div id="successScreen">
   <div class="success-card">
-    <h2>✓ Sukses!</h2>
-    <p>Data Berhasil Disimpan!<br><span class="en">Data saved successfully</span></p>
-    <button onclick="location.reload()">Selesai / Finish</button>
+    <div class="success-icon">✅</div>
+    <h2>Data Berhasil Disimpan! <span style="font-size:0.85rem;font-weight:400;color:#7A6A52;display:block;margin-top:2px">Data saved successfully</span></h2>
+    <p>Informasi lahan Anda telah tercatat dalam sistem.<br><span style="font-size:0.82rem;color:#aaa">Your field has been recorded.</span></p>
+    <div class="success-data" id="successData"></div>
+    <button id="newEntryBtn" onclick="resetForm()">+ Daftarkan Lahan Lain <span style="font-size:0.82rem;font-weight:400;opacity:0.8">/ Add Another Field</span></button>
   </div>
 </div>
 
 <script>
-  let currentLat = null, currentLng = null;
+  let map = null;
+  let marker = null;
+  let currentLat = null;
+  let currentLng = null;
+  let locationConfirmed = false;
 
+  // ── GPS ──
   function getGPS() {
-    const gpsBtn = document.getElementById('getGpsBtn');
-    gpsBtn.textContent = "Mengambil... / Acquiring...";
-    
+    const btn = document.getElementById('getGpsBtn');
+    const pulse = document.getElementById('gpsPulse');
+    const coords = document.getElementById('gpsCoords');
+    const accuracy = document.getElementById('gpsAccuracy');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> Mengambil lokasi... <span style="font-size:0.8rem;font-weight:400;opacity:0.8">Getting location</span>';
+    pulse.className = 'gps-pulse loading';
+    coords.textContent = 'Mencari sinyal GPS...';
+
+    if (!navigator.geolocation) {
+      showGPSError('GPS tidak didukung di perangkat ini');
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
-      pos => {
+      (pos) => {
         currentLat = pos.coords.latitude;
         currentLng = pos.coords.longitude;
-        document.getElementById('gpsCoords').textContent = currentLat + ", " + currentLng;
-        document.getElementById('saveBtn').disabled = false;
-        gpsBtn.innerHTML = "📡 Ambil Lokasi GPS <span class='en' style='color:#fff;'>Get GPS Location</span>";
+        const acc = Math.round(pos.coords.accuracy);
+
+        pulse.className = 'gps-pulse ok';
+        coords.textContent = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
+        accuracy.textContent = `Akurasi: ±${acc} meter`;
+        btn.innerHTML = '<span>🔄</span> Perbarui Lokasi <span style="font-size:0.8rem;font-weight:400;opacity:0.8">· Update Location</span>';
+        btn.disabled = false;
+        hideError('err-gps');
+
+        showMap(currentLat, currentLng);
+        updateSteps(2);
       },
-      err => {
-        alert("GPS Error: " + err.message);
-        gpsBtn.innerHTML = "📡 Ambil Lokasi GPS <span class='en' style='color:#fff;'>Get GPS Location</span>";
+      (err) => {
+        let msg = 'Tidak dapat mengambil lokasi.';
+        if (err.code === 1) msg = 'Izin lokasi ditolak. Aktifkan GPS di pengaturan.';
+        if (err.code === 2) msg = 'Sinyal GPS tidak ditemukan. Coba di tempat terbuka.';
+        if (err.code === 3) msg = 'Waktu habis. Coba lagi.';
+        showGPSError(msg);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   }
 
-  async function saveData() {
-    const nameInput = document.getElementById('farmerName');
-    const errName = document.getElementById('err-name');
-    
-    // バリデーション
-    if (!nameInput.value.trim()) {
-      errName.classList.add('show');
-      nameInput.focus();
-      return;
-    } else {
-      errName.classList.remove('show');
+  function showGPSError(msg) {
+    const pulse = document.getElementById('gpsPulse');
+    const coords = document.getElementById('gpsCoords');
+    const btn = document.getElementById('getGpsBtn');
+    pulse.className = 'gps-pulse error';
+    coords.textContent = msg;
+    btn.innerHTML = '<span>📡</span> Coba Lagi <span style="font-size:0.8rem;font-weight:400;opacity:0.8">· Try Again</span>';
+    btn.disabled = false;
+  }
+
+  // ── Map ──
+  function showMap(lat, lng) {
+    const container = document.getElementById('mapContainer');
+    container.classList.add('visible');
+    locationConfirmed = false;
+    updateSaveBtn();
+
+    if (map) {
+      map.remove();
+      map = null;
     }
 
-    const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    btn.textContent = "Mengirim... / Sending...";
+    setTimeout(() => {
+      map = L.map('map').setView([lat, lng], 16);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19
+      }).addTo(map);
 
-    // 1. 共有用URLから生成した、フォームの「データ送信専用エンドポイント」
-    const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScBDJB6Js5EdITOBzJcii5qrlyKcB40lLDe9IQlf_WU5EqsOw/formResponse"; 
-    // ※ 注意: 上記の URL はダミーです。ご自身のGoogleフォームの実際の公開URL（.../viewform）の末尾を「formResponse」に書き換えたものに置き換えてください。
+      const icon = L.divIcon({
+        html: `<div style="background:#2D6A2F;width:24px;height:24px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)"></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 24],
+        className: ''
+      });
 
-    // 2. 共有リンクから直接マッピングした正しい entry ID でデータを構築
+      marker = L.marker([lat, lng], { icon, draggable: true }).addTo(map);
+      marker.on('dragend', (e) => {
+        currentLat = e.target.getLatLng().lat;
+        currentLng = e.target.getLatLng().lng;
+        document.getElementById('gpsCoords').textContent =
+          `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
+        locationConfirmed = false;
+        updateSaveBtn();
+      });
+
+      map.invalidateSize();
+    }, 100);
+
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function confirmLocation() {
+    locationConfirmed = true;
+    updateSaveBtn();
+    updateSteps(3);
+    const saveSection = document.getElementById('saveSection');
+    saveSection.classList.add('visible');
+    saveSection.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function rejectLocation() {
+    locationConfirmed = false;
+    document.getElementById('mapContainer').classList.remove('visible');
+    document.getElementById('saveSection').classList.remove('visible');
+    currentLat = null; currentLng = null;
+    document.getElementById('gpsPulse').className = 'gps-pulse';
+    document.getElementById('gpsCoords').textContent = 'Belum diambil';
+    document.getElementById('gpsAccuracy').textContent = '';
+    document.getElementById('getGpsBtn').innerHTML = '<span>📡</span> Ambil Lokasi GPS Saya';
+    document.getElementById('getGpsBtn').disabled = false;
+    updateSteps(1);
+    updateSaveBtn();
+  }
+
+  function updateSaveBtn() {
+    document.getElementById('saveBtn').disabled = !locationConfirmed;
+  }
+
+  // ── Steps ──
+  function updateSteps(active) {
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById(`s${i}`);
+      dot.className = 'step-dot' + (i < active ? ' done' : i === active ? ' active' : '');
+    }
+    for (let i = 1; i <= 2; i++) {
+      const line = document.getElementById(`l${i}${i+1}`);
+      line.className = 'step-line' + (i < active ? ' done' : '');
+    }
+  }
+
+  // ── Validate ──
+  function showError(id) {
+    document.getElementById(id).classList.add('show');
+  }
+  function hideError(id) {
+    document.getElementById(id).classList.remove('show');
+  }
+
+  function validateForm() {
+    let ok = true;
+    const name = document.getElementById('farmerName').value.trim();
+    const crop = document.getElementById('cropType').value;
+    const growth = document.querySelector('input[name="growth"]:checked');
+    const drought = document.querySelector('input[name="drought"]:checked');
+
+    if (!name) { showError('err-name'); ok = false; } else hideError('err-name');
+    if (!crop) { showError('err-crop'); ok = false; } else hideError('err-crop');
+    if (!growth) { showError('err-growth'); ok = false; } else hideError('err-growth');
+    if (!drought) { showError('err-drought'); ok = false; } else hideError('err-drought');
+    if (!locationConfirmed) { showError('err-gps'); ok = false; } else hideError('err-gps');
+    return ok;
+  }
+
+  // ── Save ──
+  function saveData() {
+    if (!validateForm()) return;
+
+    const data = {
+      timestamp: new Date().toISOString(),
+      farmerName: document.getElementById('farmerName').value.trim(),
+      cropType: document.getElementById('cropType').value,
+      cropLabel: document.getElementById('cropType').options[document.getElementById('cropType').selectedIndex].text.replace(/^[^\s]+\s/, ''), // 絵文字などを除去して純粋なテキストに変換
+      growthStage: document.querySelector('input[name="growth"]:checked').value,
+      droughtLevel: document.querySelector('input[name="drought"]:checked').value,
+      latitude: currentLat,
+      longitude: currentLng,
+    };
+
+    // ── Googleフォーム直接送信を実行 ──
+    sendToSheets(data);
+
+    // ── ローカルストレージにも保存（オフライン用）──
+    const saved = JSON.parse(localStorage.getItem('farmData') || '[]');
+    saved.push(data);
+    localStorage.setItem('farmData', JSON.stringify(saved));
+  }
+
+  // Google Forms 送信関数（CORSを回避するダイレクト投函方式に修正）
+  async function sendToSheets(data) {
+    // 取得したご自身のGoogleフォームの送信専用URL（末尾を formResponse にしたもの）を指定してください
+    const FORM_URL = 'https://docs.google.com/forms/d/e/1LAiE5aP-hVHzR_zOhnBq2e9x1Ypu_X0NmTzD0k5I1qY/formResponse'; 
+    
+    // フォームの各項目 entry ID にデータを格納
     const formData = new FormData();
-    formData.append("entry.858485295", nameInput.value); // Farmer Name
-    formData.append("entry.1436440261", document.getElementById('cropType').value); // Crop
-    formData.append("entry.680654060", document.querySelector('input[name="growth"]:checked')?.value || ''); // Growth Stage
-    formData.append("entry.1741548695", "0"); // Drought Level (固定値)
-    formData.append("entry.1982855110", currentLat); // Latitude
-    formData.append("entry.1691285098", currentLng); // Longitude
-    formData.append("entry.1542468758", new Date().toISOString()); // Date/Time
+    formData.append("entry.858485295", data.farmerName);
+    formData.append("entry.1436440261", data.cropType); // フォーム側の選択肢に合わせた文言を送信
+    formData.append("entry.680654060", data.growthStage);
+    formData.append("entry.1741548695", data.droughtLevel);
+    formData.append("entry.1982855110", data.latitude);
+    formData.append("entry.1691285098", data.longitude);
+    formData.append("entry.1542468758", data.timestamp);
 
     try {
-      // CORS制限を回避して直接フォームにPOST投函
       await fetch(FORM_URL, {
-        method: "POST",
-        mode: "no-cors",
+        method: 'POST',
+        mode: 'no-cors', // これにより外部サーバー（GitHub Pages等）からの送信遮断エラーを回避します
         body: formData
       });
-      
-      // 送信成功時に元のデザイン通りのポップアップを表示
-      document.getElementById('successScreen').classList.add('visible');
+      console.log('Google Formへの送信を要求しました');
+      showSuccess(data); // 成功画面を起動
     } catch (e) {
-      alert("Error: " + e);
-      btn.disabled = false;
-      btn.innerHTML = "💾 Simpan Data <span class='en' style='color:#fff;'>Save Data</span>";
+      console.error('通信エラー:', e);
+      alert("Gagal mengirim data / Failed to send data: " + e);
     }
+  }
+
+  const droughtLabels = ['Tidak ada dampak','Ringan','Sedang','Berat'];
+  const growthLabels = {
+    Bibit:'🌱 Bibit', Vegetatif:'🌿 Vegetatif',
+    Berbunga:'🌸 Berbunga', Berbuah:'🍫 Berbuah', Panen:'✂️ Siap Panen'
+  };
+
+  function showSuccess(data) {
+    document.getElementById('successData').innerHTML = `
+      <strong>👤 Petani:</strong> ${data.farmerName}<br>
+      <strong>🌱 Tanaman:</strong> ${data.cropType}<br>
+      <strong>📈 Status:</strong> ${growthLabels[data.growthStage]}<br>
+      <strong>💧 Kekeringan:</strong> ${droughtLabels[data.droughtLevel]}<br>
+      <strong>📍 Koordinat:</strong> ${data.latitude.toFixed(5)}, ${data.longitude.toFixed(5)}<br>
+      <strong>🕐 Waktu:</strong> ${new Date(data.timestamp).toLocaleString('id-ID')}
+    `;
+    document.getElementById('successScreen').classList.add('visible');
+  }
+
+  function resetForm() {
+    document.getElementById('successScreen').classList.remove('visible');
+    document.getElementById('farmerName').value = '';
+    document.getElementById('cropType').value = '';
+    document.querySelectorAll('input[name="growth"]').forEach(r => r.checked = false);
+    document.querySelectorAll('input[name="drought"]').forEach(r => r.checked = false);
+    rejectLocation();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 </script>
 </body>
